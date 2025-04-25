@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Pro | Profesyonel DNS Yönetimi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --ad-color: #ffeaa7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1000px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            background: rgba(0,0,0,0.1);
+            padding: 10px;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .nav a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+        
+        .content {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .dns-section {
+            flex: 2;
+        }
+        
+        .sidebar {
+            flex: 1;
+        }
+        
+        .dns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .dns-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+            position: relative;
+        }
+        
+        .dns-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .dns-card.active {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+        }
+        
+        .dns-card h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .dns-card p {
+            color: #636e72;
+            font-size: 14px;
+            font-family: monospace;
+        }
+        
+        .dns-card .speed {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(0,0,0,0.05);
+        }
+        
+        .dns-card .recommended {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--success);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .speed.fast {
+            color: var(--success);
+        }
+        
+        .speed.medium {
+            color: var(--warning);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5649c0;
+        }
+        
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background: #dfe6e9;
+        }
+        
+        .btn i {
+            font-size: 18px;
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(45, 52, 54, 0.05);
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .status.success {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--success);
+        }
+        
+        .status.error {
+            background: rgba(214, 48, 49, 0.1);
+            color: var(--danger);
+        }
+        
+        .ad-container {
+            background: var(--ad-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px dashed var(--dark);
+        }
+        
+        .ad-container h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .ad-placeholder {
+            width: 100%;
+            height: 150px;
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: var(--dark);
+            font-size: 14px;
+        }
+        
+        .sidebar-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-section h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 10px;
+        }
+        
+        .sidebar-section p {
+            font-size: 14px;
+            color: #636e72;
+            margin-bottom: 15px;
+        }
+        
+        .sidebar-section ul {
+            list-style: none;
+            font-size: 14px;
+        }
+        
+        .sidebar-section ul li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-section ul li i {
+            color: var(--primary);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #636e72;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .footer-links a {
+            color: #636e72;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: var(--dark);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .modal-body {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .modal-body h3 {
+            margin: 15px 0 10px 0;
+            color: var(--primary);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .dns-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dns-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .footer-links {
+                justify-content: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-globe"></i> DNS Pro</h1>
+            <p>Profesyonel DNS Yönetimi ve İnternet Özgürlüğü</p>
+            <div class="nav">
+                <a href="#" class="active"><i class="fas fa-home"></i> Ana Sayfa</a>
+                <a href="#" onclick="openModal('policyModal')"><i class="fas fa-file-contract"></i> Politikalar</a>
+                <a href="#" onclick="openModal('privacyModal')"><i class="fas fa-user-shield"></i> Gizlilik</a>
+                <a href="#"><i class="fas fa-question-circle"></i> Yardım</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="main-content">
+                <div class="dns-section">
+                    <h2>DNS Sağlayıcı Seçin</h2>
+                    <p>İhtiyacınıza en uygun DNS sağlayıcıyı seçin:</p>
+                    
+                    <div class="dns-grid">
+                        <div class="dns-card" onclick="selectDNS('google')">
+                            <div class="recommended">TAVSİYE</div>
+                            <h3>Google DNS</h3>
+                            <p>8.8.8.8<br>8.8.4.4</p>
+                            <span class="speed fast"><i class="fas fa-bolt"></i> Çok Hızlı</span>
+                        </div>
+                        
+                        <div class="dns-card" onclick="selectDNS('cloudflare')">
+                            <h3>Cloudflare</h3>
+                            <p>1.1.1.1<br>1.0.0.1</p>
+                            <span class="speed fast"><i class="fas fa-bolt"></i> Çok Hızlı</span>
+                        </div>
+                        
+                        <div class="dns-card" onclick="selectDNS('opendns')">
+                            <h3>OpenDNS</h3>
+                            <p>208.67.222.222<br>208.67.220.220</p>
+                            <span class="speed medium"><i class="fas fa-tachometer-alt"></i> Orta</span>
+                        </div>
+                        
+                        <div class="dns-card" onclick="selectDNS('quad9')">
+                            <h3>Quad9</h3>
+                            <p>9.9.9.9<br>149.112.112.112</p>
+                            <span class="speed medium"><i class="fas fa-tachometer-alt"></i> Orta</span>
+                        </div>
+                        
+                        <div class="dns-card" onclick="selectDNS('cleanbrowsing')">
+                            <h3>CleanBrowsing</h3>
+                            <p>185.228.168.9<br>185.228.169.9</p>
+                            <span class="speed medium"><i class="fas fa-shield-alt"></i> Güvenli</span>
+                        </div>
+                        
+                        <div class="dns-card" onclick="selectDNS('custom')">
+                            <h3>Özel DNS</h3>
+                            <p id="customDnsText">Belirtilmemiş</p>
+                            <span class="speed"><i class="fas fa-cog"></i> Özel</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="applyDNS()">
+                            <i class="fas fa-sync-alt"></i> DNS'i Değiştir
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetDNS()">
+                            <i class="fas fa-undo"></i> Varsayılana Dön
+                        </button>
+                        <button class="btn btn-secondary" onclick="openCustomDnsModal()">
+                            <i class="fas fa-edit"></i> Özel DNS
+                        </button>
+                    </div>
+                    
+                    <div id="statusMessage" class="status"></div>
+                    
+                    <div class="ad-container">
+                        <h3>Premium VPN Hizmeti</h3>
+                        <p>DNS değiştirmek yeterli değilse, tam koruma için VPN kullanın</p>
+                        <div class="ad-placeholder">
+                            [VPN REKLAMI BURAYA GELECEK]
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar">
+                    <div class="ad-container">
+                        <h3>Sponsorlu Bağlantı</h3>
+                        <div class="ad-placeholder">
+                            [REKLAM ALANI 300x250]
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-info-circle"></i> DNS Değiştirme Rehberi</h3>
+                        <p>DNS sunucunuzu değiştirmek için:</p>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Bir DNS sağlayıcı seçin</li>
+                            <li><i class="fas fa-check"></i> "DNS'i Değiştir" butonuna basın</li>
+                            <li><i class="fas fa-check"></i> İndirilen dosyayı yönetici olarak çalıştırın</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-shield-alt"></i> Güvenlik Uyarısı</h3>
+                        <p>Yalnızca güvenilir DNS sağlayıcıları kullanın. DNS değiştirmek:</p>
+                        <ul>
+                            <li><i class="fas fa-lock"></i> Bazı sitelere erişiminizi açabilir</li>
+                            <li><i class="fas fa-exclamation-triangle"></i> Yasal sorumluluk doğurabilir</li>
+                            <li><i class="fas fa-user-secret"></i> Gizliliğinizi etkileyebilir</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div>© 2023 DNS Pro | Tüm hakları saklıdır</div>
+            <div class="footer-links">
+                <a href="#" onclick="openModal('policyModal')">Kullanım Politikaları</a>
+                <a href="#" onclick="openModal('privacyModal')">Gizlilik Sözleşmesi</a>
+                <a href="#">İletişim</a>
+                <a href="#">SSS</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Politika Modal -->
+    <div id="policyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Kullanım Politikaları</h2>
+                <button class="close-modal" onclick="closeModal('policyModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>1. Kullanım Şartları</h3>
+                <p>DNS Pro hizmetini kullanarak aşağıdaki şartları kabul etmiş sayılırsınız:</p>
+                <ul>
+                    <li>Bu araç yalnızca yasal amaçlar için kullanılacaktır</li>
+                    <li>Yerel yasalarınıza uygun hareket etmek sizin sorumluluğunuzdadır</li>
+                    <li>Hizmetimizi kötüye kullanmayacaksınız</li>
+                </ul>
+                
+                <h3>2. Sorumluluk Reddi</h3>
+                <p>DNS Pro olarak:</p>
+                <ul>
+                    <li>DNS değişikliğinin yasal sonuçlarından sorumlu değiliz</li>
+                    <li>Hizmet kesintilerinden veya bağlantı sorunlarından sorumlu değiliz</li>
+                    <li>Üçüncü parti DNS sağlayıcılarının performansından sorumlu değiliz</li>
+                </ul>
+                
+                <h3>3. Hizmet Değişiklikleri</h3>
+                <p>Politikalarımızı ve hizmetlerimizi önceden haber vermeksizin değiştirme hakkını saklı tutarız.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gizlilik Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-shield"></i> Gizlilik Sözleşmesi</h2>
+                <button class="close-modal" onclick="closeModal('privacyModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>1. Toplanan Veriler</h3>
+                <p>DNS Pro olarak şu verileri toplayabiliriz:</p>
+                <ul>
+                    <li>Seçtiğiniz DNS sağlayıcı bilgisi (anonim olarak)</li>
+                    <li>Temel kullanım istatistikleri</li>
+                    <li>Tarayıcı bilgileri ve IP adresi (anonimleştirilmiş)</li>
+                </ul>
+                
+                <h3>2. Veri Kullanımı</h3>
+                <p>Topladığımız verileri:</p>
+                <ul>
+                    <li>Hizmetimizi geliştirmek için kullanırız</li>
+                    <li>Reklam performansını ölçmek için kullanırız</li>
+                    <li>Asla üçüncü şahıslara satmayız</li>
+                </ul>
+                
+                <h3>3. Çerezler</h3>
+                <p>Web sitemiz temel işlevsellik için çerezler kullanır. Çerezleri tarayıcı ayarlarınızdan kontrol edebilirsiniz.</p>
+                
+                <h3>4. Güvenlik</h3>
+                <p>Verilerinizi korumak için makul önlemler alıyoruz, ancak hiçbir internet aktarımı %100 güvenli değildir.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Özel DNS Modal -->
+    <div id="customDnsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Özel DNS Ayarları</h2>
+                <button class="close-modal" onclick="closeModal('customDnsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <label for="primaryDns">Birincil DNS Adresi:</label>
+                    <input type="text" id="primaryDns" placeholder="Örnek: 8.8.8.8" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="secondaryDns">İkincil DNS Adresi (Opsiyonel):</label>
+                    <input type="text" id="secondaryDns" placeholder="Örnek: 8.8.4.4" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                </div>
+                
+                <button onclick="saveCustomDns()" style="background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%;">Kaydet ve Uygula</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedDNS = null;
+        let isProcessing = false;
+        
+        // DNS sağlayıcı seçimi
+        function selectDNS(provider) {
+            selectedDNS = provider;
+            document.querySelectorAll('.dns-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Durum mesajını gizle
+            document.getElementById('statusMessage').classList.remove('active');
+        }
+        
+        // DNS uygula
+        function applyDNS() {
+            if (isProcessing) return;
+            
+            if (!selectedDNS) {
+                showStatus('Lütfen bir DNS sağlayıcı seçin!', 'error');
+                return;
+            }
+            
+            isProcessing = true;
+            showStatus('DNS ayarları değiştiriliyor, lütfen bekleyin...', '');
+            
+            // Simüle edilmiş işlem
+            setTimeout(() => {
+                let dnsName = '';
+                let dns1 = '';
+                let dns2 = '';
+                
+                switch (selectedDNS) {
+                    case 'google':
+                        dnsName = 'Google DNS';
+                        dns1 = '8.8.8.8';
+                        dns2 = '8.8.4.4';
+                        break;
+                    case 'cloudflare':
+                        dnsName = 'Cloudflare';
+                        dns1 = '1.1.1.1';
+                        dns2 = '1.0.0.1';
+                        break;
+                    case 'opendns':
+                        dnsName = 'OpenDNS';
+                        dns1 = '208.67.222.222';
+                        dns2 = '208.67.220.220';
+                        break;
+                    case 'quad9':
+                        dnsName = 'Quad9';
+                        dns1 = '9.9.9.9';
+                        dns2 = '149.112.112.112';
+                        break;
+                    case 'cleanbrowsing':
+                        dnsName = 'CleanBrowsing';
+                        dns1 = '185.228.168.9';
+                        dns2 = '185.228.169.9';
+                        break;
+                    case 'custom':
+                        dnsName = 'Özel DNS';
+                        dns1 = document.getElementById('primaryDns').value;
+                        dns2 = document.getElementById('secondaryDns').value;
+                        break;
+                }
+                
+                // .bat dosyası oluştur
+                let batContent = `@echo off\n`;
+                batContent += `echo DNS Pro - DNS Degistirici\n`;
+                batContent += `echo ---------------------------------\n`;
+                batContent += `echo Yeni DNS Ayarlari:\n`;
+                batContent += `echo Birincil DNS: ${dns1}\n`;
+                if(dns2) batContent += `echo Ikincil DNS: ${dns2}\n`;
+                batContent += `echo ---------------------------------\n\n`;
+                
+                batContent += `netsh interface ip set dns name="Ethernet" static ${dns1} primary\n`;
+                if(dns2) batContent += `netsh interface ip add dns name="Ethernet" ${dns2} index=2\n`;
+                
+                batContent += `\necho DNS basariyla degistirildi!\n`;
+                batContent += `pause\n`;
+                
+                // Scripti indirme
+                downloadFile(batContent, 'dns_degistir.bat');
+                
+                showStatus(`Başarılı! ${dnsName} için script indirildi. Yönetici olarak çalıştırın.`, 'success');
+                isProcessing = false;
+            }, 1500);
+        }
+        
+        // DNS sıfırla
+        function resetDNS() {
+            if (isProcessing) return;
+            
+            isProcessing = true;
+            showStatus('DNS ayarları varsayılana döndürülüyor...', '');
+            
+            setTimeout(() => {
+                let batContent = `@echo off\n`;
+                batContent += `echo DNS Pro - DNS Sifirlama\n`;
+                batContent += `echo ---------------------------------\n`;
+                batContent += `echo DNS ayarlari varsayilana donduruluyor...\n`;
+                batContent += `echo ---------------------------------\n\n`;
+                
+                batContent += `netsh interface ip set dns name="Ethernet" source=dhcp\n`;
+                
+                batContent += `\necho DNS basariyla sifirlandi!\n`;
+                batContent += `pause\n`;
+                
+                downloadFile(batContent, 'dns_sifirla.bat');
+                
+                showStatus('Başarılı! Varsayılan DNS için script indirildi. Yönetici olarak çalıştırın.', 'success');
+                isProcessing = false;
+                selectedDNS = null;
+                
+                document.querySelectorAll('.dns-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+            }, 1500);
+        }
+        
+        // Dosya indirme fonksiyonu
+        function downloadFile(content, fileName) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Durum mesajı göster
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = 'status active';
+            
+            if (type === 'success') {
+                statusElement.classList.add('success');
+            } else if (type === 'error') {
+                statusElement.classList.add('error');
+            }
+        }
+        
+        // Modal açma/kapatma
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Özel DNS modalını aç
+        function openCustomDnsModal() {
+            document.getElementById('primaryDns').value = '';
+            document.getElementById('secondaryDns').value = '';
+            openModal('customDnsModal');
+        }
+        
+        // Özel DNS kaydet
+        function saveCustomDns() {
+            const primaryDns = document.getElementById('primaryDns').value;
+            
+            if (!primaryDns) {
+                alert('Lütfen birincil DNS adresini girin!');
+                return;
+            }
+            
+            selectedDNS = 'custom';
+            document.querySelectorAll('.dns-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Özel DNS kartını aktif et
+            const customCards = document.querySelectorAll('.dns-card');
+            customCards[customCards.length - 1].classList.add('active');
+            
+            // Özel DNS metnini güncelle
+            const secondaryDns = document.getElementById('secondaryDns').value;
+            let dnsText = primaryDns;
+            if (secondaryDns) dnsText += `<br>${secondaryDns}`;
+            document.getElementById('customDnsText').innerHTML = dnsText;
+            
+            closeModal('customDnsModal');
+            showStatus('Özel DNS ayarlandı. Uygulamak için "DNS\'i Değiştir" butonuna basın.', 'success');
+        }
+        
+        // Sayfa yüklendiğinde Google DNS'yi seçili yap
+        window.onload = function() {
+            selectDNS('google');
+        };
+    </script>
+</body>
+</html>
